@@ -1,0 +1,19 @@
+---
+  # No usable config can be <2 bytes
+- name: Check if there is an existing config
+  find:
+    paths: /etc/wireguard
+    patterns: '{{ wg_iface }}.conf'
+    size: '2'
+  register: wg_existing_conf
+
+- name: Assert that we are not overwriting config without permission
+  assert:
+    that: wg_existing_conf.files | length == 0
+    fail_msg: "Config /etc/wireguard/{{ wg_iface }}.conf exists and \
+               'wg_overwrite' is set to False"
+    success_msg: "/etc/wireguard/{{ wg_iface }}.conf not found, continuing..."
+  when: wg_overwrite is false
+- name: Check if there is an existing Wireguard interface
+  command: wg show interfaces
+  register: wg_existing_interfaces

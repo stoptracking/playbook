@@ -7,14 +7,17 @@ Role was made for and tested only on ipv4 setup. ipv6 is unsupported.
 
 Some notes to keep in mind when configuring it:
 
+1. `wg_server_ip` and `wg_server_subnet` are optional, however both must be either defined or not simultaneously.
+
+    If neither is present, target host will act as a transparent gateway. It will route packets between other peers, but won't be directly accessible from a Wireguard subnet.
+
 1. Neither `wg_clients` nor `wg_endpoints` are required.
 
-   Former provisions peers that are connecting _to the target host_.
-   Latter is for peers target host will attempt to connect _with_.
+   Former provisions peers that are connecting _to the target host_. Latter is for peers target host will attempt to connect _with_.
 
 1. Role can be run:
 
-    1. With both defined. Target host will accept connections from `wg_clients` and attempt to connect with `wg_endpoints`.
+    1. With both defined, target host will accept connections from `wg_clients` and attempt to connect with `wg_endpoints`.
 
     1. With only `wg_clients`, target host will act as a VPN-server and route packets from clients within `AllowedIPs` in each `[Peer]` section.
 
@@ -42,7 +45,7 @@ Some notes to keep in mind when configuring it:
 | wg_overwrite     | Overwrite existing config?                           | False   |
 | wg_peerkey       | Server's private key, optional                       | -       |
 | wg_port          | Server port                                          | 51820   |
-| wg_server_ip     | Server IP address                                    | -       |
+| wg_server_ip     | Server's IP that is exposed to clients, optional     | -       |
 | wg_server_subnet | Server's subnet                                      | -       |
 | wg_start         | Start WG at the end of play?                         | True    |
 | wg_systemd       | Enable systemd unit on startup?                      | True    |
@@ -62,6 +65,8 @@ Similar to the `wg_clients`:
 wg_endpoints:
   - { name: 'MyEndpoint', pubkey: '...xxxxxxx=', psk: '...xxxxxxx=', endpoint: '10.0.0.1:1234', keepalive: '25', allowedips: '10.0.0.0/24' }
 ```
+
+Please note that `allowedips` currently supports a single element only.
 
 
 ### wg_server_subnet
