@@ -10,18 +10,17 @@ Some notes to keep in mind when configuring it:
 1. Neither `wg_clients` nor `wg_endpoints` are required.
 
    Former provisions peers that are connecting _to the target host_.
-
    Latter is for peers target host will attempt to connect _with_.
 
 1. Role can be run:
 
-  1. With both defined. Target host will accept connections from `wg_clients` and attempt to connect with `wg_endpoints`.
+    1. With both defined. Target host will accept connections from `wg_clients` and attempt to connect with `wg_endpoints`.
 
-  1. With only `wg_clients`, target host will act as a VPN-server and route packets from clients within `AllowedIPs` in each `[Peer]` section.
+    1. With only `wg_clients`, target host will act as a VPN-server and route packets from clients within `AllowedIPs` in each `[Peer]` section.
 
-  1. With only `wg_endpoints`, target host will connect to each server defined in all `[Peer]` sections.
+    1. With only `wg_endpoints`, target host will connect to each server defined in all `[Peer]` sections.
 
-  1. If neither is defined, target host can still be provisioned and Wireguard interface can be brought-up, however it won't accept any connections until valid peers are added to its config.
+    1. If neither is defined, target host can still be provisioned and Wireguard interface can be brought-up, however it won't accept any connections until valid peers are added to its config.
 
 ## Requirements
 
