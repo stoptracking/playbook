@@ -1,6 +1,7 @@
 ---
 wg_autostart: true
 wg_clients: {}
+wg_endpoint: false
 wg_forward: false
 wg_iface: wg0
 wg_overwrite: false
