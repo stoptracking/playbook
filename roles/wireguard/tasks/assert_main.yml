@@ -15,57 +15,15 @@
   tags:
     - wg_assert_subnet
 
-  # No usable config can be <2 bytes
-- name: Check if there is an existing config
-  find:
-    paths: /etc/wireguard
-    patterns: '{{ wg_iface }}.conf'
-    size: '2'
-  register: wg_existing_conf
+- name: Run existing config checks
+  import_tasks: assert_conf_existing.yml
+  tags:
+    - wg_assert_conf_existing
 
-- name: Check if there is an existing Wireguard interface
-  command: wg show interfaces
-  register: wg_existing_interfaces
-
-- name: Load "listen_ports_facts" module
-  listen_ports_facts:
-
-- name: Save port state in a variable
-  set_fact:
-    wg_port_exists: "{{ wg_port in udp_listen | map(attribute='port') | flatten }}"
-
-- name: Determine if detected WG instance is listening on the port we want to use
-  shell:
-    cmd: "wg show {{ wg_iface }} | head -5 | grep 'listening port:' | rev | cut -d' ' -f1 | rev"
-  register: wg_iface_current_port
-
-- name: Assert we are not trying to provision on a busy port without permission
-  assert:
-    that: not wg_port_exists
-    success_msg: "Provisioning Wireguard on port {{ wg_port }}"
-    fail_msg: "Port {{ wg_port }} is already occupied on the target host and 'wg_overwrite' is False"
-  when:
-    - not wg_overwrite
-    - wg_existing_conf.files | length > 0
-
-- name: Assert we are overwriting an existing WG instance listening on the same port
-  assert:
-    that: wg_iface_current_port.stdout | int == wg_port
-    success_msg: "Port {{ wg_port }} is occupied by {{ wg_iface }} and will be replaced by the new WG instance"
-    fail_msg: "Port {{ wg_port }} is already occupied by {{ wg_iface }} on the target host and 'wg_overwrite' is set to False"
-  when:
-    - wg_overwrite
-    - wg_port_exists
-    - wg_existing_conf.files | length > 0
-    - wg_iface in wg_existing_interfaces.stdout
-    - wg_iface_current_port.stdout | int == wg_port
-
-- name: Assert that we are not overwriting config without permission
-  assert:
-    that: wg_existing_conf.files | length == 0
-    fail_msg: "Config /etc/wireguard/{{ wg_iface }}.conf exists and 'wg_overwrite' is set to False"
-    success_msg: "/etc/wireguard/{{ wg_iface }}.conf not found, continuing..."
-  when: wg_overwrite is false
+- name: Run port checks
+  import_tasks: assert_port.yml
+  tags:
+    - wg_assert_port
 
 - name: Tear-down the existing Wireguard interface
   shell:
