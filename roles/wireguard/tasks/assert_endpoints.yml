@@ -1,0 +1,35 @@
+---
+- name: Verify endpoints' names
+  assert:
+    that:
+      - item.name | length > 1
+      - item.name is search("^[a-zA-Z0-9]*$")
+    success_msg: "Deploying peer: {{ item.name }}"
+    fail_msg: "Invalid peer name: {{ item.name }}"
+    quiet: yes
+  loop: "{{ wg_endpoints }}"
+  loop_control:
+      label: "{{ item.name }}"
+
+- name: Verify endpoints' IPs
+  assert:
+    that:
+      - item.ip | ipv4
+    success_msg: "Deploying endpoint with IP: {{ item.ip }}"
+    fail_msg: "Endpoint`s address of {{ item.ip }} does not look like a valid ipv4"
+    quiet: yes
+  loop: "{{ wg_endpoints }}"
+  loop_control:
+      label: "{{ item.ip }}"
+
+- name: Verify endpoints' keys lengths
+  assert:
+    that:
+      - item.pubkey | length == 44
+      - item.psk | length == 44
+    quiet: yes
+    success_msg: "Endpoint's keys are 44 symbols long"
+    fail_msg: "Key length is wrong"
+  loop: "{{ wg_endpoints }}"
+  loop_control:
+      label: "{{ item.name }}"

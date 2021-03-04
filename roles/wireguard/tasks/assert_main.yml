@@ -10,6 +10,12 @@
   tags:
     - wg_assert_peers
 
+- name: Run endpoints checks
+  import_tasks: assert_endpoints.yml
+  when: wg_endpoints | length > 0
+  tags:
+    - wg_assert_endpoints
+
 - name: Run subnet checks
   import_tasks: assert_subnet.yml
   tags:
