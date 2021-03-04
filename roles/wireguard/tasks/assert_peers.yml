@@ -1,0 +1,35 @@
+---
+- name: Verify peers' names
+  assert:
+    that:
+      - item.name | length > 1
+      - item.name is search("^[a-zA-Z0-9]*$")
+    success_msg: "Deploying peer: {{ item.name }}"
+    fail_msg: "Invalid peer name: {{ item.name }}"
+    quiet: yes
+  loop: "{{ wg_clients }}"
+  loop_control:
+      label: "{{ item.name }}"
+
+- name: Verify peers' IPs
+  assert:
+    that:
+      - item.ip | ipv4(wg_server_subnet)
+    success_msg: "Deploying peer with IP: {{ item.ip }}"
+    fail_msg: "Peer {{ item.ip }} is outside of server's subnet {{ wg_server_subnet }}"
+    quiet: yes
+  loop: "{{ wg_clients }}"
+  loop_control:
+      label: "{{ item.ip }}"
+
+- name: Verify peers' keys lengths
+  assert:
+    that:
+      - item.pubkey | length == 44
+      - item.psk | length == 44
+    quiet: yes
+    success_msg: "Client's keys are 44 symbols long"
+    fail_msg: "Key length is wrong"
+  loop: "{{ wg_clients }}"
+  loop_control:
+      label: "{{ item.name }}"

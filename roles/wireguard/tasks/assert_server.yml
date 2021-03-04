@@ -1,0 +1,25 @@
+---
+- name: Verify server's IP
+  assert:
+    that: wg_server_ip | ipv4
+    success_msg: "Server's private IP: {{ wg_server_ip }}"
+    fail_msg: "Incorrect server IP: {{ wg_server_ip }}"
+
+- name: Verify that server`s IP is within its subnet
+  assert:
+    that: wg_server_ip | ipv4(wg_server_subnet)
+    success_msg: "Provisioning subnet: {{ wg_server_subnet }}"
+    fail_msg: "Server`s ip '{{ wg_server_ip }}' is outside of its own \
+               subnet '{{ wg_server_subnet }}'"
+
+- name: Verify Wireguard port
+  assert:
+    that: wg_port | int > 1 and wg_port | int < 65535
+    success_msg: "Server will be listening on port {{ wg_port }}"
+    fail_msg: "Invalid port number: {{ wg_port }}"
+
+- name: Verify interface name
+  assert:
+    that: wg_iface | length > 1
+    success_msg: "Wireguard interface: {{ wg_iface }}"
+    fail_msg: "Invalid interface name: {{ wg_iface }}"

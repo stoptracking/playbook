@@ -1,9 +1,9 @@
 ---
 - name: Run sanity-checks
-  import_tasks: assertions.yml
+  import_tasks: assert_main.yml
   become: yes
   tags:
-    - wg_assert
+    - wg_assert_main
 
 - name: Install wireguard
   apt:

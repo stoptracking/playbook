@@ -14,7 +14,7 @@ Some notes to keep in mind when configuring it:
 
 1. Role can be run:
 
-    1. With both defined. Target host will accept connections from `wg_clients` and attempt to connect with `wg_endpoints`.
+    1. With both defined, target host will accept connections from `wg_clients` and attempt to connect with `wg_endpoints`.
 
     1. With only `wg_clients`, target host will act as a VPN-server and route packets from clients within `AllowedIPs` in each `[Peer]` section.
 
