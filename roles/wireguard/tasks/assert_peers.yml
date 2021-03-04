@@ -11,7 +11,7 @@
   loop_control:
       label: "{{ item.name }}"
 
-- name: Verify peers' IPs
+- name: Verify that peers' IPs are within server subnet
   assert:
     that:
       - item.ip | ipv4(wg_server_subnet)
@@ -21,6 +21,7 @@
   loop: "{{ wg_clients }}"
   loop_control:
       label: "{{ item.ip }}"
+  when: wg_srv
 
 - name: Verify peers' keys lengths
   assert:

@@ -18,6 +18,7 @@
 
 - name: Run subnet checks
   import_tasks: assert_subnet.yml
+  when: wg_srv
   tags:
     - wg_assert_subnet
 
