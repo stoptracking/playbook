@@ -1,7 +1,7 @@
 # Wireguard
 Configures Wireguard on the target machine and provisions arbitrary number of clients. This role uses "server" and "client" terminology which is while absent in Wireguard's dictionary (everyone is a "peer"), does make sense in many-to-one type of setup.
 
-Role was made for and tested only on ipv4 setup. ipv6 is unsupported.
+Role was made for and tested extensively on ipv4 setup. ipv6 is unsupported.
 
 ## Logic
 
@@ -23,7 +23,9 @@ Some notes to keep in mind when configuring it:
 
     1. With only `wg_endpoints`, target host will connect to each server defined in all `[Peer]` sections.
 
-    1. If neither is defined, target host can still be provisioned and Wireguard interface can be brought-up, however it won't accept any connections until valid peers are added to its config.
+    1. If neither is defined, target host can still be provisioned and Wireguard interface can be optionally brought-up, however it won't accept any connections until valid peers are added to its config.
+
+1. In any case, routing and firewall rules are set automatically.
 
 ## Requirements
 
@@ -89,16 +91,19 @@ Should be in CIDR notation, e.g. `192.168.1.0/24`.
       - always
     vars:
       wg_autostart: true
+      wg_endpoints:
+        - { name: 'Foo', pubkey: 'sPHxX6IiLpcJpgDmoXRuAiuZdKNJsZtsIEDJGK6ubmU=', psk: 'g1p3GiazEwyEoM2RkYh148/bu0w4zXg6S1I8ybw3fT0=', ip: '10.2.0.1', port: '12335', keepalive: '0', allowedips: '10.2.0.0/16' }
+        - { name: 'Bar', pubkey: 'sPHxX6IiLpcJpgDmoXRuAiuZdKNJsZtsIEDJGK6ubmU=', psk: 'g1p3GiazEwyEoM2RkYh148/bu0w4zXg6S1I8ybw3fT0=', ip: '10.3.0.1', port: '22345', keepalive: '45', allowedips: '10.3.0.0/16' }
       wg_clients:
-        - { name: 'ClientA', pubkey: 'WC5a0cSWATZwLsQH1REjGcQsomZyEtRTaAqyRK20emY=', psk: 'yKsg+u7zY9N5rjgR3YE6cSu90aFBpxEPA3uKzK9vJc0=', ip: '192.168.1.20', keepalive: '0' }
-        - { name: 'ClientB', pubkey: 'qOwMjZuaVjfmdCSoOQbTp8MPADN+yB5gjRAmddA7jUM=', psk: 'Fo1UMMLxbyPiYwrJ/vE7tqPa66gblskjIc5xyQPsXgg=', ip: '192.168.1.30', keepalive: '33' }
+        - { name: 'Blob', pubkey: 'WC5a0cSWATZwLsQH1REjGcQsomZyEtRTaAqyRK20emY=', psk: 'yKsg+u7zY9N5rjgR3YE6cSu90aFBpxEPA3uKzK9vJc0=', ip: '10.2.1.10', keepalive: '0' }
+        - { name: 'Fred', pubkey: 'qOwMjZuaVjfmdCSoOQbTp8MPADN+yB5gjRAmddA7jUM=', psk: 'Fo1UMMLxbyPiYwrJ/vE7tqPa66gblskjIc5xyQPsXgg=', ip: '10.3.1.20', keepalive: '90' }
       wg_forward: true
-      wg_iface: wg5
+      wg_iface: wg8
       wg_overwrite: true
-      wg_peerkey: wIZPnbsM9lto1MSD2J.22.gbIsSHmp1LFu96IGX2310=
-      wg_port: 12344
-      wg_server_ip: 192.168.1.1
-      wg_server_subnet: '192.168.1.0/24'
+      wg_peerkey: OIxcoXM0NaNtsSZM7aNGDeqpUiQxkZ4+eG9OmLSFe3k=
+      wg_port: 12345
+      wg_server_ip: 10.0.0.10
+      wg_server_subnet: '10.0.0.0/8'
       wg_start: true
       wg_systemd: true
 ```
