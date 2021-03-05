@@ -57,3 +57,7 @@
     that: wg_iface | length > 1
     success_msg: "Wireguard interface: {{ wg_iface }}"
     fail_msg: "Invalid interface name: {{ wg_iface }}"
+
+- name: Check if there are existing Wireguard interfaces
+  command: wg show interfaces
+  register: wg_existing_interfaces
