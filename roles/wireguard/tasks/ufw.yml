@@ -6,11 +6,11 @@
     replace: '\1'
   when: wg_forward
 
-  # Don't drop packets silently as the clients are already authenticated at this stage
-- name: Change default UFW forward policy to REJECT
+  # Two packets walk into a public interface...
+- name: Change default UFW forward policy to DROP
   lineinfile:
     path: "/etc/default/ufw"
-    line: 'DEFAULT_FORWARD_POLICY="REJECT"'
+    line: 'DEFAULT_FORWARD_POLICY="DROP"'
     regexp: '^DEFAULT_FORWARD_POLICY'
 
 - name: Register existing Wireguard UFW rules
@@ -25,7 +25,7 @@
 - debug:
     msg: "Found {{ wg_ufw_existing_rules_count }} existing rules that match the description"
 
-# If existing rules are found and wg_overwrite
+# If existing rules are found and wg_overwrite is True
 - block:
 
   - name: Delete pre-existing Wireguard UFW rules
@@ -71,5 +71,20 @@
     to_ip: "{{ wg_clients_ips | cidr_merge('span') }}"
     interface: "{{ wg_iface }}"
     route: yes
-    comment: "Allow routing on {{ wg_iface }}"
-  when: wg_forward and not wg_srv
+    comment: "Allow routing on {{ wg_iface }} within {{ wg_clients_ips | cidr_merge('span') }}"
+  when:
+    - wg_clients_ips is defined
+    - wg_forward and not wg_srv
+
+- name: Create UFW rule to allow endpoints forwarding
+  ufw:
+    rule: allow
+    direction: in
+    from_ip: "{{ item.allowedips }}"
+    to_ip: "{{ item.allowedips }}"
+    interface: "{{ wg_iface }}"
+    route: yes
+    comment: "Allow routing on {{ wg_iface }} within {{ item.allowedips }}"
+  no_log: true
+  loop: "{{ wg_endpoints }}"
+  when: wg_forward and wg_endpoints | length > 0
