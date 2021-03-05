@@ -14,11 +14,11 @@
 - name: Assert we are not trying to provision on a busy port without permission
   assert:
     that: not wg_port_exists
-    success_msg: "Provisioning Wireguard on port {{ wg_port }}"
+    success_msg: "Provisioning Wireguard on the available port {{ wg_port }}"
     fail_msg: "Port {{ wg_port }} is already occupied on the target host and 'wg_overwrite' is False"
   when:
     - not wg_overwrite
-    - wg_existing_conf.files | length > 0
+    - wg_existing_conf
 
 - name: Assert we are overwriting an existing WG instance listening on the same port
   assert:
@@ -28,6 +28,6 @@
   when:
     - wg_overwrite
     - wg_port_exists
-    - wg_existing_conf.files | length > 0
+    - wg_existing_conf
     - wg_iface in wg_existing_interfaces.stdout
     - wg_iface_current_port.stdout | int == wg_port
