@@ -4,6 +4,7 @@
     wg_existing_ifaces: "{{ hostvars[inventory_hostname]\
                           ['ansible_%s' | format(item)]['ipv4'] }}"
   loop: "{{ ansible_interfaces }}"
+  when: hostvars[inventory_hostname]['ansible_%s' | format(item)]['ipv4'] is defined
   register: wg_existing_ifaces_parsed
 
 - name: Parse the results
@@ -39,6 +40,7 @@
                   | ipaddr(wg_server_subnet)\
                   | string] }}"
   loop: "{{ ansible_interfaces }}"
+  when: hostvars[inventory_hostname]['ansible_%s' | format(item)]['ipv4'] is defined
   vars:
     - wg_overlap_networks: []
 
@@ -126,9 +128,9 @@
     - wg_affected_ifaces is defined
     - wg_affected_addresses is defined
 
-- name: Extract IP from a Wireguard config
+- name: Extract IP from a Wireguard config we intend to replace
   shell:
-    cmd: "grep Address /etc/wireguard/{{ wg_iface }}.conf | cut -d' ' -f3 | xargs"
+    cmd: "grep Address /etc/wireguard/{{ wg_affected_ifaces[0] }}.conf | cut -d' ' -f3 | xargs"
   register: wg_existing_config_ip
   changed_when: false
 
@@ -137,9 +139,10 @@
     that:
       - wg_affected_addresses[0] | ipaddr(wg_existing_config_ip.stdout | string)
     fail_msg: "Subnet '{{ wg_existing_config_ip.stdout }}' found in \
-                the Wireguard config does not overlap with the address \
-                '{{ wg_affected_addresses[0] }}' detected above.\n\
-                Please investigate before continuing."
+                the config file of the interface '{{ wg_iface }}' does not overlap with \
+                the active address '{{ wg_affected_addresses[0] }}' detected above. \
+                Please investigate before continuing.\nEnsure you are not intruding \
+                into the space of non-Wireguard interface."
     success_msg: "Subnet '{{ wg_existing_config_ip.stdout }}' found in \
                 the Wireguard config includes '{{ wg_affected_addresses[0] }}'.\n\
                 Proceeding with overwriting it."
@@ -170,6 +173,6 @@
                 the {{ wg_affected_addresses[0] }}.\nRequested interface \
                 '{{ wg_iface }}' would overlap with '{{ wg_affected_ifaces[0] }}' \
                 on the target host.\n\
-                `wg_iface` must be set to '{{ wg_affected_ifaces[0] }}' \
-                if you want to proceed."
+                To proceed, `wg_iface` must be set to \
+                '{{ wg_affected_ifaces[0] }}' and 'wg_overwrite' to 'True'."
   when: wg_affected_ifaces[0] is defined and wg_affected_ifaces[0] != None
