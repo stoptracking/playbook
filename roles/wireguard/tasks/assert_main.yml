@@ -37,5 +37,5 @@
     cmd: "wg-quick down {{ wg_iface }}"
   when:
     - wg_overwrite
-    - wg_existing_conf.files | length > 0
+    - wg_existing_conf
     - wg_iface in wg_existing_interfaces.stdout
